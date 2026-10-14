@@ -29,7 +29,7 @@ app.use(session({
     cookie: {
         httpOnly: true,
         sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         maxAge: 30 * 60 * 1000
     }
 }));
@@ -387,10 +387,9 @@ app.use((error, req, res, next) => {
 async function iniciarServidor() {
     try {
         await pool.query('SELECT 1');
-
-        app.listen(PORT, () => {
-            console.log(`Servidor: http://localhost:${PORT}`);
-            console.log('Conexión a PostgreSQL verificada.');
+        app.listen(PORT, "0.0.0.0", () => {
+            console.log(`Servidor ejecutándose en el puerto ${PORT}`);
+            console.log('Conexión a PostgreSQL de SupaBase verificada.');
         });
     } catch (error) {
         console.error('No se pudo conectar a PostgreSQL:', error.message);
