@@ -21,16 +21,20 @@ if (!process.env.SESSION_SECRET) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Render funciona detrás de un proxy HTTPS.
+app.set('trust proxy', 1);
+
 app.use(session({
     name: 'gestion.sid',
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
         httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        secure: true,
-        maxAge: 30 * 60 * 1000
+        maxAge: 60 * 60 * 1000
     }
 }));
 
@@ -127,7 +131,11 @@ app.post('/login', async (req, res, next) => {
         // Regenerar la sesión evita reutilizar el ID anterior
         // después de autenticar al usuario.
         req.session.regenerate((error) => {
-            if (error) return next(error);
+            if (error) {
+                return res.status(500).json({
+                    message: 'No se pudo crear la sesión.'
+                });
+            }
 
             req.session.usuario = {
                 id: cuenta.id,
@@ -135,7 +143,11 @@ app.post('/login', async (req, res, next) => {
             };
 
             req.session.save((errorGuardar) => {
-                if (errorGuardar) return next(errorGuardar);
+                if (errorGuardar) {
+                    return res.status(500).json({
+                        message: 'No se pudo guardar la sesión.'
+                    });
+                }
 
                 return res.status(200).json({
                     message: 'Inicio de sesión correcto.',
