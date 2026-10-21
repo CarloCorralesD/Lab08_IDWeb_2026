@@ -65,3 +65,60 @@ formLogin.addEventListener('submit', async (event) => {
 });
 
 verificarSesion();
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    const formulario = document.getElementById('loginForm');
+
+    const mensaje = document.getElementById('mensaje');
+
+    if (!formulario) {
+        return;
+    }
+
+    formulario.addEventListener('submit', async (event) => {
+
+        event.preventDefault();
+
+        const usuario =
+            document.getElementById('usuario').value.trim();
+
+        const password =
+            document.getElementById('password').value;
+
+        mensaje.textContent = '';
+
+        try {
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    usuario,
+                    password
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || 'Error al iniciar sesión.'
+                );
+            }
+
+            // Login correcto
+            window.location.href = '/estudiantes.html';
+
+        } catch (error) {
+
+            mensaje.textContent = error.message;
+
+        }
+
+    });
+
+});

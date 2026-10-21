@@ -24,13 +24,15 @@ async function main() {
 
         const hash = await bcrypt.hash(password, 12);
 
-        await pool.query(
+        const resultado = await pool.query(
             `INSERT INTO usuarios (usuario, password_hash)
-             VALUES ($1, $2)`,
+             VALUES ($1, $2)
+             RETURNING id, usuario, activo, creado_en`,
             [usuario, hash]
         );
 
-        console.log('Usuario creado correctamente.');
+        console.log('Usuario creado correctamente:');
+        console.log(resultado.rows[0]);
     } catch (error) {
         console.error('No se pudo crear el usuario:', error.message);
     } finally {
